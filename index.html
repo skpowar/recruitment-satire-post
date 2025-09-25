@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Dynamics™ Resilience Assessment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chosen Palette: Corporate Blue, Neutral Grays, Subtle Green/Red feedback -->
+    <!-- Application Structure Plan: A multi-screen single-page application structured as an interactive quiz. The user flows from a start screen, through each question sequentially, to a final results screen. This structure was chosen because it directly translates the static assessment into an engaging, gamified experience, enhancing the satirical tone by mimicking a real corporate e-learning module. Presenting one question at a time focuses user attention and builds narrative momentum. -->
+    <!-- Visualization & Content Choices: Report Info: Assessment Questions -> Goal: Engage & Test User -> Presentation: Interactive multi-choice question cards -> Interaction: User clicks an answer, receives instant feedback, and automatically proceeds -> Justification: Creates a dynamic and intuitive user experience that is more compelling than a static text document. Report Info: Scoring Guide -> Goal: Conclude & Reward User -> Presentation: Final results screen with score and descriptive text -> Interaction: "Try Again" button to restart the quiz -> Justification: Provides a clear, satisfying end to the quiz with a humorous payoff and replayability. All elements use HTML/CSS/JS, no SVG/Mermaid. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .option-item:hover { background-color: #f0f5ff; }
+        .option-item.correct { background-color: #dcfce7; border-color: #22c55e; }
+        .option-item.incorrect { background-color: #fee2e2; border-color: #ef4444; }
+        .hide { display: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-2xl mx-auto bg-white shadow-xl rounded-2xl p-6 sm:p-8 md:p-10">
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="text-center fade-in">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">CORPORATE DYNAMICS™</h1>
+            <h2 class="text-sm sm:text-base font-semibold text-blue-600 mt-1">PROFESSIONAL RESILIENCE & EMOTIONAL ENDURANCE ASSESSMENT</h2>
+            <p class="text-xs text-slate-500 mt-1">Version 3.7 - "The Gauntlet Edition"</p>
+            
+            <div class="mt-6 text-left bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 p-4 rounded-r-lg">
+                <h3 class="font-bold text-sm">⚠️ DISCLAIMER</h3>
+                <p class="text-xs mt-1">This assessment is designed to measure your ability to maintain sanity in absurd corporate environments. Side effects may include existential dread, uncontrollable laughter, and the sudden urge to update your LinkedIn profile.</p>
+            </div>
+
+            <div class="mt-6 text-left text-sm text-slate-600 space-y-2">
+                <h3 class="font-bold text-slate-900">Instructions:</h3>
+                <p>Please select the response that best demonstrates your corporate survival instincts. There are no "wrong" answers, only answers that will get you immediately rejected or added to our "maybe in 5 years" pile.</p>
+                <p><strong class="text-slate-900">Time limit:</strong> However long it takes for your hope to die.</p>
+            </div>
+            
+            <button id="start-btn" class="mt-8 w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Begin The Gauntlet
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hide">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-slate-600">Progress</span>
+                    <span id="progress-text" class="text-sm font-bold text-blue-600"></span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="question-container" class="fade-in">
+                <p id="question-text" class="text-lg sm:text-xl font-bold text-slate-900 mb-6"></p>
+                <div id="options-container" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="text-center hide">
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Assessment Complete</h1>
+            <p class="mt-2 text-slate-600">Your professional resilience score has been calculated.</p>
+            
+            <div class="mt-6 bg-blue-50 border-2 border-dashed border-blue-200 p-6 rounded-xl">
+                <p class="text-sm text-slate-500">Your Score:</p>
+                <p id="score-text" class="text-5xl font-bold text-blue-600 my-2"></p>
+                <h2 id="result-title" class="text-lg sm:text-xl font-bold text-slate-900"></h2>
+                <p id="result-description" class="text-sm text-slate-600 mt-2 max-w-md mx-auto"></p>
+            </div>
+            
+            <p class="text-xs text-slate-500 mt-8 italic">Corporate Dynamics™ - "Crushing Dreams Since 2008"</p>
+             <button id="restart-btn" class="mt-4 w-full bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-transform transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-slate-300">
+                Face The Gauntlet Again
+            </button>
+        </div>
+    </div>
+
+<script>
+    const quizData = [
+        {
+            question: "How would you handle being ignored for 3 weeks after submitting a 10-page strategy deck that took you 40 hours to create?",
+            options: [
+                "Send increasingly desperate follow-up emails with subject lines like 'URGENT: Is my career over???'",
+                "Assume they're still 'reviewing it thoroughly' and patiently wait another month.",
+                "With grace and a bottle of wine (or three).",
+                "Create a PowerPoint presentation about why they should respond to your PowerPoint presentation."
+            ],
+            correct: 2
+        },
+        {
+            question: "You've made it to the final interview round. The hiring manager says, 'We love you, but we've decided to restructure the role. Can you interview again next month for a completely different position with half the salary?' Your ideal response is:",
+            options: [
+                "\"Absolutely! I live to be strung along indefinitely!\"",
+                "\"I appreciate the opportunity to waste more of both our time. Should I prepare a new 10-page strategy deck, or just update the old one to be in Comic Sans?\"",
+                "Start crying and ask if they need a kidney instead.",
+                "Suggest they just hire a Magic 8-Ball since it would make decisions faster."
+            ],
+            correct: 1
+        },
+        {
+            question: "You receive an auto-rejection email that begins with 'After careful consideration...' How do you interpret this?",
+            options: [
+                "They actually spent hours agonizing over this difficult decision.",
+                "A human being personally reviewed my application.",
+                "An algorithm rejected me 0.3 seconds after I clicked submit. The email was then put on a 3-week timer for 'appropriate consideration.'",
+                "I should reply asking for specific feedback about how to improve."
+            ],
+            correct: 2
+        },
+        {
+            question: "The job posting says 'Entry Level' but requires 5+ years of experience, a PhD, and the ability to travel through time. How do you handle this cognitive dissonance?",
+            options: [
+                "Assume it's a typo and apply anyway.",
+                "Start working on inventing time travel to meet the requirements.",
+                "Accept that 'entry level' is a mythological beast, much like a unicorn with 5 years of experience.",
+                "Apply and mention in your cover letter that you're willing to learn time travel on the job."
+            ],
+            correct: 2
+        },
+        {
+            question: "You're told the interview process has 'just one more step' for the seventh time. What's your internal monologue?",
+            options: [
+                "\"They must really want to make sure I'm the right fit!\"",
+                "\"At this point, I've invested more time in this process than it took to build a pyramid.\"",
+                "\"Maybe the next step will be the actual job!\"",
+                "\"I should probably start charging consulting fees for all these interviews.\""
+            ],
+            correct: 1
+        },
+        {
+            question: "They ask, 'So tell me, why do you want to work here?' You realize you've applied to so many places you genuinely can't remember what this company does. Your survival strategy:",
+            options: [
+                "Panic and admit you have no idea.",
+                "Make up something about 'synergy' and 'leveraging core competencies.'",
+                "\"I'm passionate about... *glances desperately at company logo* ...logos. And corporate... dynamics.\"",
+                "Ask them what they do and pretend it's a 'thoughtful strategic question.'"
+            ],
+            correct: 2
+        },
+        {
+            question: "When someone says 'We'll be in touch,' how long do you wait before accepting this translates to 'Never contact us again'?",
+            options: [
+                "1 week (optimist)",
+                "1 month (realist)",
+                "Immediately, but continue hoping for 6 months anyway.",
+                "I'm still waiting for responses from 2019."
+            ],
+            correct: 2
+        },
+        {
+            question: "You discover the 'competitive salary' is actually below minimum wage when calculated hourly. Your response?",
+            options: [
+                "\"But think of the exposure!\"",
+                "\"I see we define 'competitive' differently. I was competing to pay rent.\"",
+                "Ask if they accept payment in experience and good vibes.",
+                "Offer to pay them for the privilege of working there."
+            ],
+            correct: 1
+        },
+        {
+            question: "Final Boss Level: After 8 rounds of interviews, they hire the CEO's nephew instead. The rejection email thanks you for 'helping them refine what they were looking for.' How do you process this?",
+            options: [
+                "Feel honored to have been part of their journey of self-discovery.",
+                "Update your resume to include 'Professional Interview Practice Dummy.'",
+                "Add 'Helping incompetent companies make nepotistic hiring decisions' to your LinkedIn skills.",
+                "Send a thank-you note for the life lesson about corporate corruption."
+            ],
+            correct: 2
+        },
+        {
+            question: "After months of rejection, you finally accept that the job market is a cosmic joke. What's your next move?",
+            options: [
+                "Become a life coach teaching 'How to Get Rejected with Dignity.'",
+                "Start a support group for other job-seeking survivors.",
+                "All of the above, plus learn to monetize your trauma through LinkedIn posts.",
+                "Move to a remote island and become a hermit (still better benefits than most job offers)."
+            ],
+            correct: 2
+        }
+    ];
+
+    const resultsData = [
+        {
+            minScore: 0,
+            title: "Sweet summer child, bless your optimistic heart.",
+            description: "You're a beacon of hope in a sea of corporate jargon. The job market will fix that for you soon enough. We're almost sorry."
+        },
+        {
+            minScore: 5,
+            title: "You're developing healthy cynicism.",
+            description: "You've seen some things, and you're learning. With a few more crushing rejection experiences, you'll reach expert level soon."
+        },
+        {
+            minScore: 8,
+            title: "Congratulations! You're a Corporate Survivor.",
+            description: "You're overqualified for sanity but perfectly qualified for the modern job market. Consider a career in corporate consulting or dark comedy."
+        }
+    ];
+
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const startBtn = document.getElementById('start-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    
+    const progressBar = document.getElementById('progress-bar');
+    const progressText = document.getElementById('progress-text');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    startBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', startQuiz);
+
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        score = 0;
+        startScreen.classList.add('hide');
+        resultsScreen.classList.add('hide');
+        quizScreen.classList.remove('hide');
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const questionData = quizData[currentQuestionIndex];
+        questionText.innerText = questionData.question;
+        optionsContainer.innerHTML = '';
+
+        questionData.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.innerText = option;
+            button.className = 'w-full text-left p-4 border-2 border-slate-300 rounded-lg option-item transition-all duration-200';
+            button.dataset.index = index;
+            button.addEventListener('click', selectAnswer);
+            optionsContainer.appendChild(button);
+        });
+        
+        updateProgress();
+        
+        const newQuestionContainer = document.getElementById('question-container');
+        newQuestionContainer.classList.remove('fade-in');
+        void newQuestionContainer.offsetWidth; // Trigger reflow
+        newQuestionContainer.classList.add('fade-in');
+    }
+
+    function selectAnswer(e) {
+        const selectedButton = e.target;
+        const selectedIndex = parseInt(selectedButton.dataset.index);
+        const correctIndex = quizData[currentQuestionIndex].correct;
+
+        if (selectedIndex === correctIndex) {
+            score++;
+            selectedButton.classList.add('correct');
+        } else {
+            selectedButton.classList.add('incorrect');
+            optionsContainer.children[correctIndex].classList.add('correct');
+        }
+
+        Array.from(optionsContainer.children).forEach(button => {
+            button.disabled = true;
+        });
+
+        setTimeout(() => {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResults();
+            }
+        }, 1200);
+    }
+
+    function updateProgress() {
+        const progressPercentage = ((currentQuestionIndex) / quizData.length) * 100;
+        progressBar.style.width = `${progressPercentage}%`;
+        progressText.innerText = `Question ${currentQuestionIndex + 1} of ${quizData.length}`;
+    }
+
+    function showResults() {
+        quizScreen.classList.add('hide');
+        resultsScreen.classList.remove('hide');
+        resultsScreen.classList.add('fade-in');
+        
+        document.getElementById('score-text').innerText = `${score} / ${quizData.length}`;
+        
+        const result = resultsData.slice().reverse().find(r => score >= r.minScore);
+        
+        document.getElementById('result-title').innerText = result.title;
+        document.getElementById('result-description').innerText = result.description;
+    }
+
+</script>
+</body>
+</html>
